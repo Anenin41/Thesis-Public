@@ -1,0 +1,36 @@
+# .copyignore file for the rsync filter inside CopyCat.sh #
+# Author: Konstantinos Garas
+# E-mail: kgaras041@gmail.com // k.gkaras@student.rug.nl
+# Created: Mon 10 Nov 2025 @ 13:25:23 +0100
+# Modified: Mon 10 Nov 2025 @ 14:52:35 +0100
+
+# Exclude these files
+- /thesis_venv/
+- /.venv/
+- __pycache__/
+- .ipynb_checkpoints/
+- Extras/
+- .git/
+- *.tmp
+- *.swp
+- *.bak
+- *.log
+- *.aux
+- *.bbl
+- *.blg
+- *.out
+- *.toc
+- *.sty
+- *.ttf
+- *.nav
+- *.snm
+- *.vrb
+- *thesis.code-workspace
+- *.pdf
+- *.png
+- *.PNG
+- *.gif
+- *.csv
+- *.pyc
+- *.md
+- main.tex

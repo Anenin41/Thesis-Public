@@ -1,0 +1,28 @@
+# .sambaignore file for the rsync filter inside Chronicle.sh #
+# Author: Konstantine Garas
+# E-mail: kgaras041@gmail.com
+# Created: Mon 03 Nov 2025 @ 14:21:25 +0100
+# Modified: Mon 10 Nov 2025 @ 13:49:35 +0100
+
+# Exclude everything else
+- /thesis_venv/
+- /.venv/
+- __pycache__/
+- .ipynb_checkpoints/
+- *.tmp
+- *.swp
+- *.bak
+- *.log
+- *.aux
+- *.bbl
+- *.blg
+- *.out
+- *.toc
+- *.sty
+- *.ttf
+- *.nav
+- *.snm
+- *.vrb
+- *.sambaignore
+- *.gitignore
+- *thesis.code-workspace
