@@ -3,9 +3,9 @@
 # Author:   Konstantinos Garas
 # E-mail:   kgaras041@gmail.com
 # Created:  Mon 10 Nov 2025 @ 12:50:46 +0100
-# Modified: Mon 10 Nov 2025 @ 13:51:10 +0100
+# Modified: Mon 10 Nov 2025 @ 19:12:20 +0100
 
-# Description:
+# CopyCat.sh:
 # Copy a filtered subset of a fixed source tree into a fixed destination folder
 # and optionally commit+push into a GitHub repository.
 #
@@ -13,6 +13,11 @@
 # Source Dir:		~/Documents/Git/thesis
 # Dest Dir:		~/Documents/Git/thesis-public
 # Ignore File:		~/Documents/Git/thesis/.copyignore
+
+# This bash script contains SHELL EXIT CODES, here is a short list of them:
+# - Exit code 0:	Success
+# - Exit code 1:	General errors, misc errors (e.g. divide by 0)
+# - Exit code 2:	Misuse of shell builtins (e.g. empty function)
 
 # Locate script directory and project root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -36,8 +41,7 @@ BRANCH="main"
 
 usage() {
   cat <<USAGE
-Usage:
-  $(basename "$0") [options]
+Usage: CopyCat.sh [--dry-run | --apply] [-m "commit message"] [-v] [-h]
 
 Fixed paths:
   SRC : $FIXED_SRC
@@ -47,14 +51,14 @@ Project ignore file (always used if present):
   $IGNORE_FILE   (gitignore-style)
 
 Options:
-  -n, --dry-run           Preview only (default)
-  -a, --apply             Copy and (if changes) commit + push
-  -m, --message MSG       Commit message (auto-generated if omitted)
+  -n, --dry-run           Preview possible changes (default)
+  -a, --apply             Perform the copy and commit + push if there are changes
+  -m, --message MSG       Commit message to use when applying changes
   -v, --verbose           Verbose rsync output
   -h, --help              Show this help
 
 Notes:
-- Uses .copyignore syntax like .gitignore (e.g., *.log, data/, !keep.log).
+- Uses .copyignore syntax like .sambaignore (e.g., - *.log, - data/, + keep.log).
 - Will push to 'origin' on branch '$BRANCH' if 'origin' is configured.
 - Includes ALL folders (no special 'data/' handling).
 USAGE
@@ -65,7 +69,7 @@ ACTION="dry-run"
 COMMIT_MSG=""
 VERBOSE=false
 
-# Parge arguments
+# Parse arguments
 while [[  $# -gt 0 ]]; do
 	case "$1" in
 		-n|--dry-run)	ACTION="dry-run"; shift ;;
@@ -83,7 +87,7 @@ done
 }
 mkdir -p "$FIXED_DEST"
 
-# Resolve absolute paths
+# Resolve absolute paths (expand ~ to $HOME, etc...)
 if command -v realpath >/dev/null 2>&1; then
   SRC_ABS=$(realpath "$FIXED_SRC")
   DEST_ABS=$(realpath "$FIXED_DEST")
@@ -95,15 +99,18 @@ else
 fi
 
 # Build rsync options
-RSYNC_OPTS=(-a 
-	--itemize-changes 
-	--delete 
-	--exclude ".git/") 
+RSYNC_OPTS=(
+	-a 			# archive mode (keep perms, times, symlinks, etc)
+	--itemize-changes 	# show what changed
+	--delete-after 		# clean up removed files after backup
+	--exclude ".git/" 	# Never copy the privater repo's .git
+)
 
+# Verbose control
 $VERBOSE && RSYNC_OPTS+=(-v)
 [[ "$ACTION" == "dry-run" ]] && RSYNC_OPTS+=(-n)
 
-# Apply project ignore file if present
+# Apply the fixed ignore file if present (IT SHOULD BE ALWAYS PRESENT)
 if [[ -f "$IGNORE_FILE" ]]; then
 	if grep -Eq '^\s*[-+]' "$IGNORE_FILE"; then
 		RSYNC_OPTS+=(--filter=": $IGNORE_FILE")
@@ -116,6 +123,7 @@ else
 fi
 
 # Execute rsync
+echo "CopyCat"
 echo "    rsync ($ACTION)"
 echo "    SRC : $SRC_ABS"
 echo "    DEST: $DEST_ABS"
@@ -125,6 +133,7 @@ RSYNC_OUTPUT=$(rsync "${RSYNC_OPTS[@]}" "$SRC_ABS"/ "$DEST_ABS"/ 2>&1)
 RSYNC_STATUS=$?
 set -e
 
+# If rsync failed, exit and return the RSYNC_STATUS (error code)
 if [[ $RSYNC_STATUS -ne 0 ]]; then
   echo "$RSYNC_OUTPUT"
   echo "Error: rsync failed." >&2
@@ -141,7 +150,7 @@ if [[ "$ACTION" == "dry-run" ]]; then
   exit 0
 fi
 
-# Apply mode: commit & push
+# Apply mode: commit + push
 pushd "$DEST_ABS" >/dev/null
 
 # Ensure on 'main'
@@ -171,4 +180,3 @@ fi
 
 popd >/dev/null
 echo "Done."
-

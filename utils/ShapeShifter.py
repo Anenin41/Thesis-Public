@@ -2,7 +2,7 @@
 # Author: Konstantinos Garas
 # E-mail: kgaras041@gmail.com // k.gkaras@student.rug.nl
 # Created: Tue 28 Oct 2025 @ 23:55:06 +0100
-# Modified: Wed 29 Oct 2025 @ 00:59:18 +0100
+# Modified: Mon 10 Nov 2025 @ 18:50:48 +0100
 
 ''' 
 ShapeShifter Module 
@@ -38,18 +38,31 @@ from typing import Optional, List, Tuple, Dict
 # Target folder
 PAPERS_DIR = Path("~/Documents/Git/thesis/papers")
 
-# Process only these extensions (case  insensitive)
+# Process only these extensions (case insensitive)
 EXTENSIONS = {'.pdf'}
 
 # Build a compiled regular expression that matches whitespaces
-SEP_RE = re.compile(r"[\s\-–—−]+")  # space/tab/newline/dash variants
+SEP_RE = re.compile(r"[\s\-–—−]+")      # space/tab/newline/dash variants
 
-# Captur an optional leading integer index and the remaining filename
+# Capture an optional leading integer index and the remaining filename
 INDEX_RE = re.compile(r"^(\d+)(?:[\s._-]+)?(.*)$")
 
 def sanitize_component(s: str) -> str:
     """
     Sanitize a filename component by replacing whitespaces with underscores.
+
+    Operations:
+        - Trim leading/trailing whitespace
+        - Replace any whitespace/dash variant by a single underscore
+        - Collapse multiple underscores to a single underscore
+
+    Parameters:
+        s : str
+            Arbitrary filename component
+
+    Returns:
+        str:
+            Sanitized component suitable for use in future file names.
     """
     s = s.strip()
     s = SEP_RE.sub("_", s)
@@ -58,9 +71,22 @@ def sanitize_component(s: str) -> str:
 
 def split_index_and_rest(stem: str) -> Tuple[Optional[int], str]:
     """
-    Split the leading index from the rest of the filename.
-    Returns a tuple (index, rest_of_filename).
-    If no index is found, returns (None, stem).
+    Split the leading index from the rest of the filename. Returns a tuple 
+    (index, rest_of_filename). If no index is found, returns (None, stem).
+
+    Examples:
+        "12_Paper"  ->  (12, "Paper")
+        "001-Notes" ->  (1, "Notes")
+        "Draft"     ->  (None, "Draft")
+
+    Parameters:
+        stem : str
+               Filename stem without the extension.
+
+    Returns:
+        (index, rest) : Tuple[Optional[int], str]
+            - index : int or None if no leading integer was found
+            - rest  : remaining stem with any separator removed
     """
     match = INDEX_RE.match(stem)
     if match:
@@ -71,8 +97,17 @@ def split_index_and_rest(stem: str) -> Tuple[Optional[int], str]:
 
 def landing_time(p: Path) -> float:
     """
-    When did it land timestamp.
-    Linux/other: st_mtime
+    Return a sortable timestamp for the file 'arrival' order (so to denote the
+    leading index). On Linux this is handled by st_mtime. There is no guarantee
+    that this will work for other OS. 
+
+    Parameters:
+        p : Path
+            File path.
+
+    Returns:
+        float:
+            UNIX timestamp (seconds)
     """
     st = p.stat()
     sys = platform.system()
@@ -80,7 +115,16 @@ def landing_time(p: Path) -> float:
 
 def unique_dest(dest: Path) -> Path:
     """
-    Generate a unique destination path by appending suffixes if needed.
+    Return a non-colliding path by appending '_N' before the file extension. If
+    'dest' doesn't exist, it is returned unchanged.
+
+    Parameters:
+        dest : Path
+            Desired destination path.
+
+    Returns:
+        Path:
+            A unique, non-existing destination path. 
     """
     if not dest.exists():
         return dest
@@ -94,8 +138,19 @@ def unique_dest(dest: Path) -> Path:
 
 def collect_files(root: Path, recursive: bool) -> List[Path]:
     """
-    Collect files with specified extensions from the root directory.
-    If recursive is True, search subdirectories as well.
+    Gather candidate files under 'root' filtered by the file extension.
+
+    Parameters:
+        root : Path
+            The directory to scan (this is fixed).
+        recursive : bool
+            If True, recurse into subfolders using rglob, otherwise scan only 
+            the top level.
+
+    Returns:
+        List[Path]:
+            Paths to files whose suffix is in EXTENSIONS (case-insensitive). If
+            EXTENSIONS is empty (DON'T EVEN TRY), all files are returned.
     """
     it = root.rglob("*") if recursive else root.glob("*")
     files = [p for p in it if p.is_file() and 
@@ -105,15 +160,24 @@ def collect_files(root: Path, recursive: bool) -> List[Path]:
 def plan_indices(files: List[Path]) -> Tuple[List[Tuple[Path, int, str]], 
                                              Dict[Path, int]]:
     """
+    Compute numbering information for existing and unnumbered files.
+
     Determine:
       - max existing leading index among files
       - which files need an index (don't start with a number), sorted by 
       landing time
       - mapping of unnumbered files -> assigned new indices starting at max+1
     
+    Parameters:
+        files : List[Path]
+            Candidate file list from the collect_files(...) function.
+
     Returns:
-      numbered:   list of (Path, idx, rest)
-      assignments: {Path -> assigned_idx}
+        numbered : List[Tuple[Path, int, str]]
+            Files that already had an index, along with that index and the rest
+            of the stem (un-sanitized at this moment of runtime).
+        assignment : Dict[Path, int]
+            Mapping from each unnumbered file to the new index it should receive.
     """
     max_idx = 0
     numbered = []    # (Path, idx, rest)
@@ -140,9 +204,19 @@ def plan_indices(files: List[Path]) -> Tuple[List[Tuple[Path, int, str]],
 def build_new_filename(p: Path, keep_idx: Optional[int], 
                        assigned_idx: Optional[int]) -> str:
     """
-    Build the new filename (stem + original suffix) according to rules:
-      - keep_idx: preserve this index, normalize remainder
-      - assigned_idx: assign this new index to an unnumbered file
+    Construct the normalized filename (stem + original suffix).
+
+    Parameters:
+        p : Path
+            Original file path.
+        keep_idx : Optional[int]
+            Existing index parsed from the stem, or None
+        assignments : Dict[Path, int]
+            Mapping of unnumbered files to their new indices.
+
+    Returns:
+        str:
+            New filename (WITHOUT the directory component).
     """
     if keep_idx is not None:
         _, rest = split_index_and_rest(p.stem)
@@ -158,7 +232,7 @@ def build_new_filename(p: Path, keep_idx: Optional[int],
 def main():
     ap = argparse.ArgumentParser(
         description=(
-            "Normalize filenames and add sequential numbering  for unnumbered "   
+            "Normalize filenames and add sequential numbering for unnumbered "   
             "files."
         )
     )
