@@ -156,22 +156,22 @@ mkdir -p "$DEST_DIR"
 
 # rsync options
 RSYNC_OPTS=(
-  -avh				 # archive + verbose + human sizes
-  --delete-after		 # delete files that are not in src AFTER backup
-  --delay-updates		 # delays update until file transfer is complete
-  --partial			 # handle interrupted file transfers
+  -avh				                   # archive + verbose + human sizes
+  --delete-after		             # delete files that are not in src AFTER backup
+  --delay-updates		             # delays update until file transfer is complete
+  --partial			                 # handle interrupted file transfers
   --partial-dir=.rsync-partial	 # same for whole directories
-  --no-whole-file		 # enable delta-transfer alg. 
-  --itemize-changes		 # detailed info while syncing data
-  --human-readable		 # output easier to understand
-  --safe-links			 # enhance security when handling symbolic links
-  --exclude ".git/"		 # forcefully exclude .git/
-  --filter=": /.sambaignore"	 # exclude file patterns (binaries, execs, etc)
-  --no-perms			 # no permissions of transferred files
-  --no-owner			 # prevent ownership of transferred files
-  --no-group			 # prevent group ownership of transferred files
-  --omit-dir-times		 # don't update modification times of dirs
-  --modify-window=2		 # time window to determine file changes
+  --no-whole-file		             # enable delta-transfer alg. 
+  --itemize-changes		           # detailed info while syncing data
+  --human-readable		           # output easier to understand
+  --safe-links			             # enhance security when handling symbolic links
+  --exclude ".git/"		           # forcefully exclude .git/
+  --filter=": /.sambaignore"	   # exclude file patterns (binaries, execs, etc)
+  --no-perms			               # no permissions of transferred files
+  --no-owner			               # prevent ownership of transferred files
+  --no-group			               # prevent group ownership of transferred files
+  --omit-dir-times		           # don't update modification times of dirs
+  --modify-window=2		           # time window to determine file changes
   --chmod=Du=rwx,Dgo=,Fu=rw,Fgo= # set specific (non exec) perms to files in dest
 )
 

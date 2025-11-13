@@ -95,9 +95,9 @@ fi
 
 # Build rsync options
 RSYNC_OPTS=(
-	-a 			# archive mode (keep perms, times, symlinks, etc)
+	-a 			            # archive mode (keep perms, times, symlinks, etc)
 	--itemize-changes 	# show what changed
-	--delete-after 		# clean up removed files after backup
+	--delete-after 		  # clean up removed files after backup
 	--exclude ".git/" 	# Never copy the privater repo's .git
 )
 
