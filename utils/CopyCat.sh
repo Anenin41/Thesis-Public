@@ -5,8 +5,8 @@
 # and optionally commit+push into a GitHub repository.
 #
 # Expected Path:	~/Documents/Git/thesis/utils/CopyCat.sh
-# Source Dir:		~/Documents/Git/thesis
-# Dest Dir:		~/Documents/Git/thesis-public
+# Source Dir:		  ~/Documents/Git/thesis
+# Dest Dir:		    ~/Documents/Git/thesis-public
 # Ignore File:		~/Documents/Git/thesis/.copyignore
 
 # This bash script contains SHELL EXIT CODES, here is a short list of them:
