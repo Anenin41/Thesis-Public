@@ -49,11 +49,18 @@ Here:
 # Librarian.sh
 This bash script automatically mounts or dismounts a private[^1] samba share drive. It also checks if the drive is mounted (or not mounted) before performing each operation, and returns back an appropriate message. This script is destined to be used **globally**. Because it contains privileged information, it is not uploaded on this public repository.
 
-## Usage
+## Setup
+After setting up the Samba share drive path on the script, run the following commands to make the script executable globally.
+
 ```bash
 mv Librarian.sh librarian
 chmod 755 librarian
 sudo cp librarian /usr/local/bin/
+```
+
+## Usage
+```
+librarian [mount | unmount]
 ```
 
 [^1]: The samba share is not public access.
