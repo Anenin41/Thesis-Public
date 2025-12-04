@@ -2,7 +2,7 @@ ABSOLUTE_PATH = /home/anenin/Documents/Git/thesis/report
 TARGET = main
 REPORT  = main.pdf
 BIBLIO = $(ABSOLUTE_PATH)/references.bib
-XFILES = main.tex intro.tex
+XFILES = main.tex intro.tex models.tex rainfall.tex runoff.tex numerics.tex simulations.tex
 
 # Add <file.tex> if you split the document into files.
 

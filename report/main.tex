@@ -1,8 +1,4 @@
 % RUG LaTeX Template %
-% Author: Konstantinos Gkaras
-% E-mail: kgaras041@gmail.com // k.gkaras@student.rug.nl
-% Created: Sat 19 Oct 2024 @ 00:30:12 +0200
-% Modified: Thu 04 Dec 2025 @ 12:07:45 +0100
 
 \documentclass{article}
 
@@ -169,10 +165,18 @@
 % Define new page geometry because the default was changed for title page.
 \newgeometry{top=1in,bottom=1in,right=1in,left=1in}
 
+% Add the Abstract before the table of contents
+\input{abstract.tex}
+
 % Table of contents
-%\tableofcontents
+\tableofcontents
 
 % Input document sub-files, following the divide and conquer strategy.
-\input{intro.tex}
+\input{intro.tex}					% Introduction to the paper
+\input{models.tex}					% Modelling Rainfall-Runoff with Moments
+\input{rainfall.tex}				% Rainfall dynamics
+\input{runoff.tex}					% Infiltration dynamics
+\input{numerics.tex}				% Numerical Discretization Schemes
+\input{simulations.tex}				% Numerical Simulations
 
 \end{document}
