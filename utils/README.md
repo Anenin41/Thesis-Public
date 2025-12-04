@@ -63,4 +63,8 @@ sudo cp librarian /usr/local/bin/
 librarian [mount | unmount]
 ```
 
+Here:
+- `mount` mounts the Samba share on path, which can later be accessed with a symbolic link from `$HOME`.
+- `unmount` safely disengaged the Samba share.
+
 [^1]: The samba share is not public access.
